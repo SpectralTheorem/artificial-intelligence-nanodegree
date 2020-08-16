@@ -1,5 +1,3 @@
-# artificial-intelligence-nanodegree
+# artificial-intelligence-projects
 
-This repo hosts multiple projects in artificial intelligence nanodegree, which include:
-
-1. Sudoku solver
+This repo hosts multiple AI personal projects.
