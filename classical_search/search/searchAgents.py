@@ -4,7 +4,7 @@
 # educational purposes provided that (1) you do not distribute or publish
 # solutions, (2) you retain this notice, and (3) you provide clear
 # attribution to UC Berkeley, including a link to http://ai.berkeley.edu.
-# 
+#
 # Attribution Information: The Pacman AI projects were developed at UC Berkeley.
 # The core projects and autograders were primarily created by John DeNero
 # (denero@cs.berkeley.edu) and Dan Klein (klein@cs.berkeley.edu).
@@ -288,6 +288,7 @@ class CornersProblem(search.SearchProblem):
         # Please add any code here which you would like to use
         # in initializing the problem
         "*** YOUR CODE HERE ***"
+        self.startState = self.startingPosition, False, False, False, False
 
     def getStartState(self):
         """
@@ -295,14 +296,14 @@ class CornersProblem(search.SearchProblem):
         space)
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return self.startState
 
     def isGoalState(self, state):
         """
         Returns whether this search state is a goal state of the problem.
         """
         "*** YOUR CODE HERE ***"
-        util.raiseNotDefined()
+        return all(state[1:])
 
     def getSuccessors(self, state):
         """
@@ -325,6 +326,19 @@ class CornersProblem(search.SearchProblem):
             #   hitsWall = self.walls[nextx][nexty]
 
             "*** YOUR CODE HERE ***"
+            x,y = state[0]
+            dx, dy = Actions.directionToVector(action)
+            nextx, nexty = int(x + dx), int(y + dy)
+            nextPos = nextx, nexty
+            hitsWall = self.walls[nextx][nexty]
+            if not hitsWall:
+                successorState = (
+                        nextPos,
+                        True if nextPos == self.corners[0] else state[1],
+                        True if nextPos == self.corners[1] else state[2],
+                        True if nextPos == self.corners[2] else state[3],
+                        True if nextPos == self.corners[3] else state[4])
+                successors.append((successorState, action, 1))
 
         self._expanded += 1 # DO NOT CHANGE
         return successors
