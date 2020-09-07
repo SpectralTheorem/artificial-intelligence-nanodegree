@@ -33,7 +33,7 @@ class CustomPlayer(DataPlayer):
                 return -simulate(state)
             action = random.choice(state.actions())
             reward = build_tree(state.result(action), book, depth - 1)
-            book[hash(state)][action] += reward
+            book[state][action] += reward
             return -reward
 
         def simulate(state):
@@ -73,7 +73,7 @@ class CustomPlayer(DataPlayer):
         if state.ply_count <= 4:
             # Try to refer the opening book
             if hash(state) in self.data:
-                self.queue.put(self.data[hash(state)])
+                self.queue.put(self.data[state])
             else:
                 self.queue.put(random.choice(state.actions()))
             # Randomly choose opening moves
