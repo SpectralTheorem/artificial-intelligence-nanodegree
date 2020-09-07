@@ -1,5 +1,8 @@
+from collections import defaultdict, Counter
+import pickle
 import random
 
+from isolation import Isolation
 from sample_players import DataPlayer
 
 
@@ -21,6 +24,31 @@ class CustomPlayer(DataPlayer):
     **********************************************************************
     """
 
+    @classmethod
+    def build_table(cls, num_rounds=100000):
+
+        def build_tree(state, book, depth=4):
+            if depth <= 0 or state.terminal_test():
+                return -simulate(state)
+            action = random.choice(state.actions())
+            reward = build_tree(state.result(action), book, depth - 1)
+            book[hash(state)][action] += reward
+            return -reward
+
+        def simulate(state):
+            while not state.terminal_test():
+                state = state.result(random.choice(state.actions()))
+            return -1 if state.utility(state.player()) < 0 else 1
+
+        book = defaultdict(Counter)
+        for _ in range(num_rounds):
+            state = Isolation()
+            build_tree(state, book)
+
+        best_move_book = {k: max(v, key=v.get) for k, v in book.items()}
+        with open("data.pickle", 'wb') as f:
+            pickle.dump(best_move_book, f)
+
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
         available in the current state calls self.queue.put(ACTION) at least
@@ -38,19 +66,24 @@ class CustomPlayer(DataPlayer):
           Refer to (and use!) the Isolation.play() function to run games.
         **********************************************************************
         """
-        # Randomly select a move as player 1 or 2 on an empty board
-        if state.ply_count < 2:
-            self.queue.put(random.choice(state.actions()))
+        if state.ply_count <= 8:
+            # Try to refer the opening book
+            if hash(state) in self.data:
+                self.queue.put(self.data[hash(state)])
+            else:
+                self.queue.put(random.choice(state.actions()))
+            # Randomly choose opening moves
+            # self.queue.put(random.choice(state.actions()))
         else:
-            self.queue.put(self.alpha_beta_search(state, depth=4))
+            self.queue.put(self._alpha_beta_search(state))
 
-    def alpha_beta_search(self, state, depth):
+    def _alpha_beta_search(self, state, depth=4):
 
         def min_value(state, alpha, beta, depth):
             if state.terminal_test():
                 return state.utility(self.player_id)
             if depth <= 0:
-                return self.score(state)
+                return score(state)
             value = float("inf")
             for action in state.actions():
                 value = min(value,
@@ -65,7 +98,7 @@ class CustomPlayer(DataPlayer):
             if state.terminal_test():
                 return state.utility(self.player_id)
             if depth <= 0:
-                return self.score(state)
+                return score(state)
             value = float("-inf")
             for action in state.actions():
                 value = max(value,
@@ -75,6 +108,13 @@ class CustomPlayer(DataPlayer):
                     return value
                 alpha = max(alpha, value)
             return value
+
+        def score(state):
+            own_loc = state.locs[self.player_id]
+            opp_loc = state.locs[1 - self.player_id]
+            own_liberties = state.liberties(own_loc)
+            opp_liberties = state.liberties(opp_loc)
+            return len(own_liberties) - len(opp_liberties)
 
         alpha = float("-inf")
         beta = float("inf")
@@ -86,11 +126,9 @@ class CustomPlayer(DataPlayer):
             if value > best_score:
                 best_score = value
                 best_move = action
+
         return best_move
 
-    def score(self, state):
-        own_loc = state.locs[self.player_id]
-        opp_loc = state.locs[1 - self.player_id]
-        own_liberties = state.liberties(own_loc)
-        opp_liberties = state.liberties(opp_loc)
-        return len(own_liberties) - len(opp_liberties)
+
+if __name__ == "__main__":
+    CustomPlayer.build_table()
