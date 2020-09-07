@@ -1,6 +1,7 @@
 from collections import defaultdict, Counter
 import pickle
 import random
+import tqdm
 
 from isolation import Isolation
 from sample_players import DataPlayer
@@ -25,7 +26,7 @@ class CustomPlayer(DataPlayer):
     """
 
     @classmethod
-    def build_table(cls, num_rounds=100000):
+    def build_opening_book(cls, num_rounds=100000):
 
         def build_tree(state, book, depth=4):
             if depth <= 0 or state.terminal_test():
@@ -36,18 +37,21 @@ class CustomPlayer(DataPlayer):
             return -reward
 
         def simulate(state):
+            """Simulates the game using random moves and returns a score.
+            """
             while not state.terminal_test():
                 state = state.result(random.choice(state.actions()))
             return -1 if state.utility(state.player()) < 0 else 1
 
-        book = defaultdict(Counter)
-        for _ in range(num_rounds):
+        raw_book = defaultdict(Counter)
+        print('Start building opening book:')
+        for _ in tqdm.tqdm(range(num_rounds)):
             state = Isolation()
-            build_tree(state, book)
+            build_tree(state, raw_book)
 
-        best_move_book = {k: max(v, key=v.get) for k, v in book.items()}
+        opening_book = {k: max(v, key=v.get) for k, v in raw_book.items()}
         with open("data.pickle", 'wb') as f:
-            pickle.dump(best_move_book, f)
+            pickle.dump(opening_book, f)
 
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
@@ -66,7 +70,7 @@ class CustomPlayer(DataPlayer):
           Refer to (and use!) the Isolation.play() function to run games.
         **********************************************************************
         """
-        if state.ply_count <= 8:
+        if state.ply_count <= 4:
             # Try to refer the opening book
             if hash(state) in self.data:
                 self.queue.put(self.data[hash(state)])
@@ -131,4 +135,4 @@ class CustomPlayer(DataPlayer):
 
 
 if __name__ == "__main__":
-    CustomPlayer.build_table()
+    CustomPlayer.build_opening_book()
