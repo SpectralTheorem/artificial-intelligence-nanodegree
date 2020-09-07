@@ -26,7 +26,7 @@ class CustomPlayer(DataPlayer):
     """
 
     @classmethod
-    def build_opening_book(cls, num_rounds=100000):
+    def build_opening_book(cls, num_rounds=300000):
 
         def build_tree(state, book, depth=4):
             if depth <= 0 or state.terminal_test():
@@ -37,8 +37,6 @@ class CustomPlayer(DataPlayer):
             return -reward
 
         def simulate(state):
-            """Simulates the game using random moves and returns a score.
-            """
             while not state.terminal_test():
                 state = state.result(random.choice(state.actions()))
             return -1 if state.utility(state.player()) < 0 else 1
@@ -52,6 +50,14 @@ class CustomPlayer(DataPlayer):
         opening_book = {k: max(v, key=v.get) for k, v in raw_book.items()}
         with open("data.pickle", 'wb') as f:
             pickle.dump(opening_book, f)
+
+    def display_opening_book(self):
+        new_game = Isolation()
+        first_move = self.data[new_game]
+        print(first_move)
+        next_state = new_game.result(first_move)
+        second_move = self.data[next_state]
+        print(second_move)
 
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
@@ -136,3 +142,4 @@ class CustomPlayer(DataPlayer):
 
 if __name__ == "__main__":
     CustomPlayer.build_opening_book()
+    # CustomPlayer(0).display_opening_book()
