@@ -3,6 +3,7 @@ import pickle
 import random
 import tqdm
 
+from isolation import DebugState
 from isolation import Isolation
 from sample_players import DataPlayer
 
@@ -52,12 +53,15 @@ class CustomPlayer(DataPlayer):
             pickle.dump(opening_book, f)
 
     def display_opening_book(self):
-        new_game = Isolation()
-        first_move = self.data[new_game]
-        print(first_move)
-        next_state = new_game.result(first_move)
-        second_move = self.data[next_state]
-        print(second_move)
+        state_0 = Isolation()
+        action1 = self.data[state_0]
+        state_1 = state_0.result(action1)
+        print('Opening move')
+        print(DebugState.from_state(state_1))
+        action2 = self.data[state_1]
+        state_2 = state_1.result(action2)
+        print('Counter move')
+        print(DebugState.from_state(state_2))
 
     def get_action(self, state):
         """ Employ an adversarial search technique to choose an action
@@ -76,14 +80,15 @@ class CustomPlayer(DataPlayer):
           Refer to (and use!) the Isolation.play() function to run games.
         **********************************************************************
         """
+        # print(DebugState.from_state(state))
         if state.ply_count <= 4:
             # Try to refer the opening book
-            if hash(state) in self.data:
-                self.queue.put(self.data[state])
-            else:
-                self.queue.put(random.choice(state.actions()))
+            # if hash(state) in self.data:
+            #     self.queue.put(self.data[state])
+            # else:
+            #     self.queue.put(random.choice(state.actions()))
             # Randomly choose opening moves
-            # self.queue.put(random.choice(state.actions()))
+            self.queue.put(random.choice(state.actions()))
         else:
             self.queue.put(self._alpha_beta_search(state))
 
@@ -126,20 +131,13 @@ class CustomPlayer(DataPlayer):
             opp_liberties = state.liberties(opp_loc)
             return len(own_liberties) - len(opp_liberties)
 
-        alpha = float("-inf")
-        beta = float("inf")
-        best_score = float("-inf")
-        best_move = None
-        for action in state.actions():
-            value = min_value(state.result(action), alpha, beta, depth-1)
-            alpha = max(alpha, value)
-            if value > best_score:
-                best_score = value
-                best_move = action
-
-        return best_move
+        return max(state.actions(),
+                   key=lambda x: min_value(state.result(x),
+                                           float("-inf"),
+                                           float("inf"),
+                                           depth - 1))
 
 
 if __name__ == "__main__":
-    CustomPlayer.build_opening_book()
-    # CustomPlayer(0).display_opening_book()
+    # CustomPlayer.build_opening_book()
+    CustomPlayer(0).display_opening_book()
