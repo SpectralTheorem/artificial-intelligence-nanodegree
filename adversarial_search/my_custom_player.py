@@ -92,7 +92,7 @@ class CustomPlayer(DataPlayer):
         else:
             self.queue.put(self._alpha_beta_search(state))
 
-    def _alpha_beta_search(self, state, depth=4):
+    def _alpha_beta_search(self, state, depth=8):
 
         def min_value(state, alpha, beta, depth):
             if state.terminal_test():
@@ -129,7 +129,7 @@ class CustomPlayer(DataPlayer):
             opp_loc = state.locs[1 - self.player_id]
             own_liberties = state.liberties(own_loc)
             opp_liberties = state.liberties(opp_loc)
-            return len(own_liberties) - len(opp_liberties)
+            return len(own_liberties) - 2*len(opp_liberties)
 
         return max(state.actions(),
                    key=lambda x: min_value(state.result(x),
