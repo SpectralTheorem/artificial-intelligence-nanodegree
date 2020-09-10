@@ -8,3 +8,4 @@ This repo includes implementations of multiple AI algorithms:
 * BFS, DFS, uniform cost search, A*
 * Classical planning algorithm for air cargo problem
 * Hill climbing, local beam, simulation annealing for TSP
+* Alpha-beta search for playing board games
