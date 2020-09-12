@@ -26,8 +26,8 @@ class CustomPlayer(DataPlayer):
     **********************************************************************
     """
 
-    @classmethod
-    def build_opening_book(cls, num_rounds=300000):
+    @staticmethod
+    def build_opening_book(num_rounds=300000):
 
         def build_tree(state, book, depth=4):
             if depth <= 0 or state.terminal_test():
