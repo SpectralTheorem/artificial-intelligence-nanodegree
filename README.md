@@ -2,10 +2,12 @@
 
 This repo includes implementations of multiple AI algorithms:
 
-* A simple Sudoku solver
-* N queens with Z3
-* Sudoku solver with Z3
-* BFS, DFS, uniform cost search, A*
-* Classical planning algorithm for air cargo problem
-* Hill climbing, local beam, simulation annealing for TSP
-* Alpha-beta search for playing board games
+* Sudoku solver using simple search
+* N queens solver using Z3 Prover
+* Sudoku solver using Z3 Prover
+* BFS, DFS, uniform cost search, A* search
+* Air cargo planner using classical planning
+* TSP optimizer using hill climbing, local beam, and simulation annealing
+* Board games agent using alpha-beta pruning
+* Spam classifier using Naive Bayes
+* Part of speech tagger using Hidden Markov Model
